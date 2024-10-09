@@ -1,7 +1,8 @@
 const { Pool } = require("pg");
-const { PGUSER, PGPASSWORD, PGHOST, PGPORT, PGDATABASE } = require("../config");
+const { DATABASE_URL, DATABASE_NAME, NODE_ENV } = require("../config");
 const path = require("path");
 const fs = require("fs");
+const { ssl } = require("pg/lib/defaults");
 
 class DB {
   static #pool;
@@ -10,14 +11,9 @@ class DB {
   static async connect() {
     if (!this.#pool) {
       this.#pool = new Pool({
-        user: PGUSER,
-        password: PGPASSWORD,
-        host: PGHOST,
-        port: PGPORT,
-        database: PGDATABASE,
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        connectionString: `${DATABASE_URL}/${DATABASE_NAME}`,
+        // ssl: NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
+        ssl: false,
       });
 
       this.#pool.on("error", (err) => {
